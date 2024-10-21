@@ -14,6 +14,7 @@
     </button>
     <button
       class="p-2 rounded-lg transition duration-200 hover:bg-gray-200 hover:ring-2 hover:ring-gray-200"
+      @click="$emit('openModal')"
     >
       <Icon icon="streamline:add-circle-solid" class="h-8 w-8 text-blue-400" />
     </button>
