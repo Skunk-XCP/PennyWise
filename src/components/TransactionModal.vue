@@ -12,7 +12,9 @@
         <Icon icon="emojione-v1:cross-mark" class="h-3 w-3" />
       </button>
 
-      <h2 class="text-xl font-bold mb-4">Ajouter une transaction</h2>
+      <!-- Toggle switch "Revenus / Dépenses" -->
+      <ToggleSwitch :initialIncome="mode === 'income'" @updateMode="setMode" />
+
       <!-- Contenu de la modale : formulaire pour ajouter une transaction -->
       <div class="flex">
         <label for="amount" class="text-lg font-medium text-gray-700"
@@ -25,37 +27,57 @@
           min="0"
           step="0.01"
           class="border rounded ml-8"
+          v-model.number="amount"
         />
       </div>
-      <p>Catégorie</p>
-      <p>Note</p>
+      <button
+        class="w-full bg-green-500 p-2 mt-6 rounded text-white text-xl"
+        @click="addTransaction"
+      >
+        Save
+      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Icon } from '@iconify/vue'
-import { defineComponent, onBeforeMount, onMounted } from 'vue'
+import { defineComponent, ref } from 'vue'
+import ToggleSwitch from './ToggleSwitch.vue'
 
 export default defineComponent({
   name: 'TransactionModal',
   components: {
+    ToggleSwitch,
     Icon,
   },
+  emits: ['transaction', 'close'],
+  props: {
+    initialMode: {
+      type: String,
+      default: 'income',
+    },
+  },
   setup(props, { emit }) {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+    const amount = ref<number | null>(null)
+    const mode = ref<'income' | 'expenses'>('expenses')
+
+    const setMode = (newMode: 'income' | 'expenses') => {
+      mode.value = newMode
+    }
+
+    const addTransaction = () => {
+      if (amount.value !== null && amount.value > 0) {
+        emit('transaction', {
+          amount: amount.value,
+          mode: mode.value,
+        })
+        amount.value = null
         emit('close')
       }
     }
 
-    onMounted(() => {
-      window.addEventListener('keydown', handleEscapeKey)
-    })
-
-    onBeforeMount(() => {
-      window.removeEventListener('keydown', handleEscapeKey)
-    })
+    return { amount, mode, setMode, addTransaction }
   },
 })
 </script>

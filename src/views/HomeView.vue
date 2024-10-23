@@ -2,7 +2,12 @@
   <main>
     <FinanceCard :income="income" :expenses="expenses" />
 
-    <TransactionModal v-if="showModal" @close="showModal = false" />
+    <TransactionModal
+      v-if="showModal"
+      @close="showModal = false"
+      @transaction="handleTransaction"
+      :initialMode="'income'"
+    />
 
     <div
       class="bg-zinc-200 h-96 mt-4 flex items-center justify-center"
@@ -27,8 +32,8 @@ export default defineComponent({
     TransactionModal,
   },
   setup() {
-    const income = 5000
-    const expenses = 2000
+    const income = ref(0)
+    const expenses = ref(0)
 
     const showModal = ref(false)
 
@@ -36,7 +41,18 @@ export default defineComponent({
       showModal.value = true
     }
 
-    return { showModal, openModal, income, expenses }
+    const handleTransaction = (transaction: {
+      amount: number
+      mode: 'income' | 'expenses'
+    }) => {
+      if (transaction.mode === 'income') {
+        income.value += transaction.amount
+      } else if (transaction.mode === 'expenses') {
+        expenses.value += transaction.amount
+      }
+    }
+
+    return { showModal, openModal, income, expenses, handleTransaction }
   },
 })
 </script>
