@@ -31,7 +31,15 @@
         />
       </div>
       <button
-        class="w-full bg-green-500 p-2 mt-6 rounded text-white text-xl"
+        :class="[
+          'w-full',
+          'p-2',
+          'mt-6',
+          'rounded',
+          'text-white',
+          'text-xl',
+          mode === 'income' ? 'bg-green-500' : 'bg-orange-500',
+        ]"
         @click="addTransaction"
       >
         Save
