@@ -1,16 +1,31 @@
 <template>
-  <div class="flex items-center space-x-2 mb-6">
-    <span :class="{ 'text-gray-400': !isIncome }">Revenus</span>
+  <div class="flex justify-center items-center space-x-4 mb-8">
+    <!-- Switch container -->
     <div
-      class="relative w-16 h-8 rounded-full bg-gray-300 cursor-pointer"
+      class="relative w-48 h-10 rounded-full bg-white border-2 border-gray-300 cursor-pointer flex items-center"
       @click="toggleSwitch"
     >
+      <!-- Bouton coulissant -->
       <div
-        class="absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transform transition-transform"
-        :class="isIncome ? 'translate-x-1' : 'translate-x-8'"
+        class="absolute w-24 h-8 rounded-full shadow-md transform transition-transform"
+        :class="{ 'bg-green-500': isIncome, 'bg-orange-500': !isIncome }"
+        :style="{ left: isIncome ? '2px' : '90px' }"
       ></div>
+
+      <!-- Texte "Revenus" et "Dépenses" -->
+      <span
+        class="absolute left-4 font-semibold transition-colors duration-300"
+        :class="isIncome ? 'text-white' : 'text-gray-400'"
+      >
+        Revenus
+      </span>
+      <span
+        class="absolute right-4 font-semibold transition-colors duration-300"
+        :class="!isIncome ? 'text-white' : 'text-gray-400'"
+      >
+        Dépenses
+      </span>
     </div>
-    <span :class="{ 'text-gray-400': isIncome }">Dépenses</span>
   </div>
 </template>
 
@@ -34,10 +49,7 @@ export default defineComponent({
       emit('updateMode', isIncome.value ? 'income' : 'expenses')
     }
 
-    return {
-      isIncome,
-      toggleSwitch,
-    }
+    return { isIncome, toggleSwitch }
   },
 })
 </script>
