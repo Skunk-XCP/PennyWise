@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import TransactionModal from '@/components/TransactionModal.vue'
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 import FinanceCard from '../components/FinanceCard.vue'
 import TaskBar from '../components/TaskBar.vue'
 
@@ -32,8 +32,8 @@ export default defineComponent({
     TransactionModal,
   },
   setup() {
-    const income = ref(0)
-    const expenses = ref(0)
+    const income = ref(parseFloat(localStorage.getItem('income') || '0'))
+    const expenses = ref(parseFloat(localStorage.getItem('expenses') || '0'))
 
     const showModal = ref(false)
 
@@ -51,6 +51,14 @@ export default defineComponent({
         expenses.value += transaction.amount
       }
     }
+
+    watch(income, newIncome => {
+      localStorage.setItem('income', newIncome.toString())
+    })
+
+    watch(expenses, newExpenses => {
+      localStorage.setItem('expenses', newExpenses.toString())
+    })
 
     return { showModal, openModal, income, expenses, handleTransaction }
   },
