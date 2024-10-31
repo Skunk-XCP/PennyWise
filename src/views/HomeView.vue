@@ -31,9 +31,15 @@
 <script lang="ts">
 import TransactionList from '@/components/TransactionList.vue'
 import TransactionModal from '@/components/TransactionModal.vue'
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, onMounted, ref, watch } from 'vue'
 import FinanceCard from '../components/FinanceCard.vue'
 import TaskBar from '../components/TaskBar.vue'
+
+interface Transaction {
+  amount: number
+  mode: 'income' | 'expenses'
+  date: string
+}
 
 export default defineComponent({
   components: {
@@ -45,11 +51,17 @@ export default defineComponent({
   setup() {
     const income = ref(parseFloat(localStorage.getItem('income') || '0'))
     const expenses = ref(parseFloat(localStorage.getItem('expenses') || '0'))
-    const transactions = ref<{ amount: number; mode: 'income' | 'expenses' }[]>(
-      JSON.parse(localStorage.getItem('transactions') || '[]'),
-    )
+    const transactions = ref<Transaction[]>([])
 
     const showModal = ref(false)
+
+    // Charger les transactions telles quelles, sans modifier les dates
+    onMounted(() => {
+      const storedTransactions = JSON.parse(
+        localStorage.getItem('transactions') || '[]',
+      )
+      transactions.value = storedTransactions
+    })
 
     const openModal = () => {
       showModal.value = true
@@ -59,17 +71,20 @@ export default defineComponent({
       amount: number
       mode: 'income' | 'expenses'
     }) => {
-      // Ajouter la transaction aux revenus ou dépenses
       if (transaction.mode === 'income') {
         income.value += transaction.amount
       } else if (transaction.mode === 'expenses') {
         expenses.value += transaction.amount
       }
 
-      // Ajouter la transaction à la liste
-      transactions.value.push(transaction)
+      // Utiliser la date actuelle pour les nouvelles transactions, sans affecter les transactions existantes
+      const todayDate = new Date().toISOString().split('T')[0]
+      transactions.value.push({
+        ...transaction,
+        date: todayDate,
+      })
 
-      // Sauvegarder les transactions dans le localStorage
+      // Sauvegarder les transactions dans le localStorage sans altérer les dates d'origine
       localStorage.setItem('transactions', JSON.stringify(transactions.value))
     }
 
