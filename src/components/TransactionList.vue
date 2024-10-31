@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div v-for="(transactions, date) in groupedTransactions" :key="date">
       <div
-        class="text-center bg-gray-100 p-2 rounded-lg font-bold text-lg mb-2"
+        class="text-center bg-blue-200 p-2 rounded-lg font-bold text-lg mb-2"
       >
         {{ formatDate(date) }}
       </div>
