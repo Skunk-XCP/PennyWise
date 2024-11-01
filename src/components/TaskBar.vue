@@ -4,11 +4,13 @@
   >
     <button
       class="p-2 rounded-lg transition duration-200 hover:bg-gray-200 hover:ring-2 hover:ring-gray-200"
+      @click="$emit('openCalendar')"
     >
       <Icon icon="ic:round-home" class="h-6 w-6" />
     </button>
     <button
       class="p-2 rounded-lg transition duration-200 hover:bg-gray-200 hover:ring-2 hover:ring-gray-200"
+      @click="$emit('openCalendar')"
     >
       <Icon icon="mdi:calendar-outline" class="h-6 w-6" />
     </button>
@@ -40,5 +42,6 @@ export default defineComponent({
   components: {
     Icon,
   },
+  emits: ['openModal', 'openCalendar'],
 })
 </script>

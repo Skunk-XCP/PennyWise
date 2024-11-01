@@ -15,6 +15,11 @@
       class="bg-zinc-200 h-96 mt-4 overflow-auto rounded-lg p-4 transaction-list-container"
       style="height: 70vh"
     >
+      <CalendarModal
+        v-if="isCalendarModalOpen"
+        :isOpen="isCalendarModalOpen"
+        @close="isCalendarModalOpen = false"
+      />
       <TransactionList :transactions="transactions" />
     </div>
     <div
@@ -24,11 +29,14 @@
     >
       <p class="text-zinc-400 text-xl font-bold text-center">No data</p>
     </div>
-    <TaskBar @openModal="openModal" />
+
+    <!-- Barre de tâches avec écoute de l'événement openCalendar -->
+    <TaskBar @openModal="openModal" @openCalendar="openCalendarModal" />
   </main>
 </template>
 
 <script lang="ts">
+import CalendarModal from '@/components/CalendarModal.vue'
 import TransactionList from '@/components/TransactionList.vue'
 import TransactionModal from '@/components/TransactionModal.vue'
 import { defineComponent, onMounted, ref, watch } from 'vue'
@@ -47,6 +55,7 @@ export default defineComponent({
     TaskBar,
     TransactionModal,
     TransactionList,
+    CalendarModal,
   },
   setup() {
     const income = ref(parseFloat(localStorage.getItem('income') || '0'))
@@ -54,6 +63,7 @@ export default defineComponent({
     const transactions = ref<Transaction[]>([])
 
     const showModal = ref(false)
+    const isCalendarModalOpen = ref(false)
 
     // Charger les transactions telles quelles, sans modifier les dates
     onMounted(() => {
@@ -65,6 +75,14 @@ export default defineComponent({
 
     const openModal = () => {
       showModal.value = true
+    }
+
+    const openCalendarModal = () => {
+      isCalendarModalOpen.value = true
+    }
+
+    const closeCalendarModal = () => {
+      isCalendarModalOpen.value = false
     }
 
     const handleTransaction = (transaction: {
@@ -103,32 +121,10 @@ export default defineComponent({
       expenses,
       transactions,
       handleTransaction,
+      isCalendarModalOpen,
+      openCalendarModal,
+      closeCalendarModal,
     }
   },
 })
 </script>
-
-<style scoped>
-.transaction-list-container {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.transaction-list-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.transaction-list-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.transaction-list-container::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border-radius: 10px;
-}
-
-.transaction-list-container::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
-}
-</style>
