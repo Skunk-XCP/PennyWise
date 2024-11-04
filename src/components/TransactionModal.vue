@@ -30,6 +30,18 @@
           v-model.number="amount"
         />
       </div>
+
+      <!-- Ligne pour sélectionner la date -->
+      <div class="flex items-center my-4">
+        <label class="text-lg font-medium text-gray-700">Date</label>
+        <button
+          class="ml-16 text-green-500 underline"
+          @click="openDateSelector"
+        >
+          {{ formattedDate }}
+        </button>
+      </div>
+
       <button
         :class="[
           'w-full',
@@ -44,13 +56,22 @@
       >
         Save
       </button>
+
+      <!-- Modal de sélection de date simple -->
+      <CalendarSimpleModal
+        v-if="isDateSelectorOpen"
+        :selectedDate="selectedDate"
+        @close="isDateSelectorOpen = false"
+        @updateDate="updateDate"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Icon } from '@iconify/vue'
-import { defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
+import CalendarSimpleModal from './CalendarSimpleModal.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 
 export default defineComponent({
@@ -58,6 +79,7 @@ export default defineComponent({
   components: {
     ToggleSwitch,
     Icon,
+    CalendarSimpleModal,
   },
   emits: ['transaction', 'close'],
   props: {
@@ -69,9 +91,28 @@ export default defineComponent({
   setup(props, { emit }) {
     const amount = ref<number | null>(null)
     const mode = ref<'income' | 'expenses'>('expenses')
+    const selectedDate = ref(new Date())
+    const isDateSelectorOpen = ref(false)
+
+    const formattedDate = computed(() => {
+      return selectedDate.value.toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    })
 
     const setMode = (newMode: 'income' | 'expenses') => {
       mode.value = newMode
+    }
+
+    const openDateSelector = () => {
+      isDateSelectorOpen.value = true
+    }
+
+    const updateDate = (newDate: Date) => {
+      selectedDate.value = newDate
+      isDateSelectorOpen.value = false
     }
 
     const addTransaction = () => {
@@ -79,13 +120,24 @@ export default defineComponent({
         emit('transaction', {
           amount: amount.value,
           mode: mode.value,
+          date: selectedDate.value.toISOString().split('T')[0],
         })
         amount.value = null
         emit('close')
       }
     }
 
-    return { amount, mode, setMode, addTransaction }
+    return {
+      amount,
+      mode,
+      setMode,
+      addTransaction,
+      selectedDate,
+      formattedDate,
+      isDateSelectorOpen,
+      openDateSelector,
+      updateDate,
+    }
   },
 })
 </script>
