@@ -130,3 +130,24 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.transaction-list-container {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.transaction-list-container::-webkit-scrollbar {
+  width: 8px;
+}
+.transaction-list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.transaction-list-container::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 10px;
+}
+.transaction-list-container::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+</style>

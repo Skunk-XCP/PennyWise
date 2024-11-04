@@ -10,7 +10,18 @@
       >
         <Icon icon="mdi:close" class="h-5 w-5" />
       </button>
-      <h2 class="text-xl font-bold mb-4 text-center">Calendrier</h2>
+      <!-- Navigation entre les mois -->
+      <div class="flex items-center justify-evenly mb-4">
+        <button @click="previousMonth">
+          <Icon icon="mdi:chevron-left" class="h-5 w-5" />
+        </button>
+        <h2 class="text-xl font-bold text-center">
+          {{ monthName }} {{ currentYear }}
+        </h2>
+        <button @click="nextMonth">
+          <Icon icon="mdi:chevron-right" class="h-5 w-5" />
+        </button>
+      </div>
       <div class="grid grid-cols-7 gap-2">
         <!-- En-têtes des jours de la semaine -->
         <div
@@ -38,7 +49,9 @@
           <div class="overflow-hidden max-h-10 text-center">
             <div
               v-for="transaction in (
-                transactionsByDate[formatDate(year, month, date)] || []
+                transactionsByDate[
+                  formatDate(currentYear, currentMonth, date)
+                ] || []
               ).slice(0, 2)"
               :key="transaction.amount"
               class="text-xs font-semibold truncate"
@@ -54,8 +67,11 @@
           <!-- Indicateur si plus de transactions existent -->
           <span
             v-if="
-              (transactionsByDate[formatDate(year, month, date)] || []).length >
-              3
+              (
+                transactionsByDate[
+                  formatDate(currentYear, currentMonth, date)
+                ] || []
+              ).length > 3
             "
             class="absolute bottom-1 text-xs text-gray-500"
           >
@@ -69,7 +85,7 @@
 
 <script lang="ts">
 import { Icon } from '@iconify/vue'
-import { computed, defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType, ref } from 'vue'
 
 interface Transaction {
   amount: number
@@ -92,22 +108,58 @@ export default defineComponent({
   },
   emits: ['close'],
   setup(props, { emit }) {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth()
-    const today = now.getDate()
+    const today = new Date()
+    const currentYear = ref(today.getFullYear())
+    const currentMonth = ref(today.getMonth())
 
     const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
+    // Navigation entre les mois
+    const nextMonth = () => {
+      if (currentMonth.value === 11) {
+        currentMonth.value = 0
+        currentYear.value++
+      } else {
+        currentMonth.value++
+      }
+    }
+
+    const previousMonth = () => {
+      if (currentMonth.value === 0) {
+        currentMonth.value = 11
+        currentYear.value--
+      } else {
+        currentMonth.value--
+      }
+    }
+
+    // Calculer le nom du mois
+    const monthName = computed(() => {
+      return new Date(currentYear.value, currentMonth.value).toLocaleString(
+        'fr-FR',
+        {
+          month: 'long',
+        },
+      )
+    })
+
     // Création de chaque jour du mois comme simple numéro
     const daysInMonth = computed(() => {
-      const totalDaysInMonth = new Date(year, month + 1, 0).getDate()
+      const totalDaysInMonth = new Date(
+        currentYear.value,
+        currentMonth.value + 1,
+        0,
+      ).getDate()
       return Array.from({ length: totalDaysInMonth }, (_, i) => i + 1)
     })
 
     // Calcul des jours vides avant le début du mois
     const emptyDaysStart = computed(() => {
-      const firstDayOfMonth = new Date(year, month, 1).getDay()
+      const firstDayOfMonth = new Date(
+        currentYear.value,
+        currentMonth.value,
+        1,
+      ).getDay()
       return firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1
     })
 
@@ -116,7 +168,11 @@ export default defineComponent({
 
     // Vérification si une date est aujourd'hui
     const isToday = (date: number) => {
-      return date === today
+      return (
+        date === today.getDate() &&
+        currentMonth.value === today.getMonth() &&
+        currentYear.value === today.getFullYear()
+      )
     }
 
     // Formatage de la date pour correspondre à celles des transactions
@@ -147,9 +203,11 @@ export default defineComponent({
       formatDate,
       transactionsByDate,
       closeModal,
-      year,
-      month,
-      today,
+      currentYear,
+      currentMonth,
+      monthName,
+      nextMonth,
+      previousMonth,
     }
   },
 })
