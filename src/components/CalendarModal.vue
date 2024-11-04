@@ -26,14 +26,41 @@
           :key="'empty' + empty"
           class="text-center p-4"
         ></div>
-        <!-- Jours du mois -->
+        <!-- Jours du mois avec transactions -->
         <div
           v-for="date in daysInMonth"
           :key="date"
-          class="text-center p-4 border rounded-lg"
+          class="p-2 border rounded-lg flex flex-col items-center justify-start h-20 overflow-hidden relative"
           :class="{ 'bg-blue-100': isToday(date) }"
         >
-          {{ date }}
+          <span class="text-sm font-semibold">{{ date }}</span>
+          <!-- Afficher les transactions limitées à un certain nombre de lignes -->
+          <div class="overflow-hidden max-h-10 text-center">
+            <div
+              v-for="transaction in (
+                transactionsByDate[formatDate(year, month, date)] || []
+              ).slice(0, 2)"
+              :key="transaction.amount"
+              class="text-xs font-semibold truncate"
+              :class="
+                transaction.mode === 'income'
+                  ? 'text-green-500'
+                  : 'text-red-500'
+              "
+            >
+              {{ transaction.amount }} €
+            </div>
+          </div>
+          <!-- Indicateur si plus de transactions existent -->
+          <span
+            v-if="
+              (transactionsByDate[formatDate(year, month, date)] || []).length >
+              3
+            "
+            class="absolute bottom-1 text-xs text-gray-500"
+          >
+            ...
+          </span>
         </div>
       </div>
     </div>
@@ -42,7 +69,13 @@
 
 <script lang="ts">
 import { Icon } from '@iconify/vue'
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, PropType } from 'vue'
+
+interface Transaction {
+  amount: number
+  mode: 'income' | 'expenses'
+  date: string
+}
 
 export default defineComponent({
   name: 'CalendarModal',
@@ -52,13 +85,17 @@ export default defineComponent({
       type: Boolean,
       required: true,
     },
+    transactions: {
+      type: Array as PropType<Transaction[]>,
+      required: true,
+    },
   },
   emits: ['close'],
-  setup(_, { emit }) {
+  setup(props, { emit }) {
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth()
-    const today = now.getDate() // Jour actuel
+    const today = now.getDate()
 
     const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -77,17 +114,42 @@ export default defineComponent({
     // Fonction pour fermer la modal
     const closeModal = () => emit('close')
 
-    // Vérification manuelle si une date est aujourd'hui
+    // Vérification si une date est aujourd'hui
     const isToday = (date: number) => {
       return date === today
     }
+
+    // Formatage de la date pour correspondre à celles des transactions
+    const formatDate = (year: number, month: number, day: number) => {
+      const monthString = (month + 1).toString().padStart(2, '0')
+      const dayString = day.toString().padStart(2, '0')
+      return `${year}-${monthString}-${dayString}`
+    }
+
+    // Grouper les transactions par date
+    const transactionsByDate = computed(() => {
+      const grouped: Record<string, Transaction[]> = {}
+      props.transactions.forEach(transaction => {
+        const transactionDate = transaction.date
+        if (!grouped[transactionDate]) {
+          grouped[transactionDate] = []
+        }
+        grouped[transactionDate].push(transaction)
+      })
+      return grouped
+    })
 
     return {
       days,
       daysInMonth,
       emptyDaysStart,
       isToday,
+      formatDate,
+      transactionsByDate,
       closeModal,
+      year,
+      month,
+      today,
     }
   },
 })

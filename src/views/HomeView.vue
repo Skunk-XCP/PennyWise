@@ -18,8 +18,10 @@
       <CalendarModal
         v-if="isCalendarModalOpen"
         :isOpen="isCalendarModalOpen"
+        :transactions="transactions"
         @close="isCalendarModalOpen = false"
       />
+
       <TransactionList :transactions="transactions" />
     </div>
     <div
