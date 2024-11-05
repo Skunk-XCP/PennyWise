@@ -12,8 +12,18 @@
         </button>
       </div>
 
-      <!-- Titre de la modal -->
-      <h2 class="text-xl font-bold mb-4 text-center">Sélectionnez une date</h2>
+      <!-- Navigation mois -->
+      <div class="flex items-center justify-between mb-4">
+        <button @click="previousMonth" class="text-gray-600 hover:text-black">
+          <Icon icon="mdi:chevron-left" class="h-6 w-6" />
+        </button>
+        <h2 class="text-xl font-bold text-center">
+          {{ monthName }} {{ currentYear }}
+        </h2>
+        <button @click="nextMonth" class="text-gray-600 hover:text-black">
+          <Icon icon="mdi:chevron-right" class="h-6 w-6" />
+        </button>
+      </div>
 
       <!-- Calendrier -->
       <div class="grid grid-cols-7 gap-2">
@@ -48,7 +58,7 @@
 
 <script lang="ts">
 import { Icon } from '@iconify/vue'
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'CalendarSimpleModal',
@@ -62,35 +72,97 @@ export default defineComponent({
   emits: ['close', 'updateDate'],
   setup(props, { emit }) {
     const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-    const year = props.selectedDate.getFullYear()
-    const month = props.selectedDate.getMonth()
 
-    const today = new Date()
+    // Variables pour le mois et l'année en cours
+    const currentYear = ref(props.selectedDate.getFullYear())
+    const currentMonth = ref(props.selectedDate.getMonth())
 
+    // Noms des mois en français
+    const monthNames = [
+      'Janvier',
+      'Février',
+      'Mars',
+      'Avril',
+      'Mai',
+      'Juin',
+      'Juillet',
+      'Août',
+      'Septembre',
+      'Octobre',
+      'Novembre',
+      'Décembre',
+    ]
+
+    // Calcul du nom du mois en cours
+    const monthName = computed(() => monthNames[currentMonth.value])
+
+    // Calcul du nombre de jours dans le mois
     const daysInMonth = computed(() => {
-      const totalDays = new Date(year, month + 1, 0).getDate()
+      const totalDays = new Date(
+        currentYear.value,
+        currentMonth.value + 1,
+        0,
+      ).getDate()
       return Array.from({ length: totalDays }, (_, i) => i + 1)
     })
 
+    // Calcul des jours vides avant le début du mois
     const emptyDaysStart = computed(() => {
-      const firstDay = new Date(year, month, 1).getDay()
+      const firstDay = new Date(
+        currentYear.value,
+        currentMonth.value,
+        1,
+      ).getDay()
       return firstDay === 0 ? 6 : firstDay - 1
     })
 
+    // Sélection de la date
     const selectDate = (day: number) => {
-      const newDate = new Date(year, month, day)
+      const newDate = new Date(currentYear.value, currentMonth.value, day)
+      newDate.setHours(12, 0, 0, 0)
       emit('updateDate', newDate)
     }
 
+    // Vérification si la date est aujourd'hui
+    const today = new Date()
     const isToday = (day: number) => {
       return (
         today.getDate() === day &&
-        today.getMonth() === month &&
-        today.getFullYear() === year
+        today.getMonth() === currentMonth.value &&
+        today.getFullYear() === currentYear.value
       )
     }
 
-    return { days, daysInMonth, emptyDaysStart, selectDate, isToday }
+    // Navigation entre les mois
+    const previousMonth = () => {
+      if (currentMonth.value === 0) {
+        currentMonth.value = 11
+        currentYear.value -= 1
+      } else {
+        currentMonth.value -= 1
+      }
+    }
+
+    const nextMonth = () => {
+      if (currentMonth.value === 11) {
+        currentMonth.value = 0
+        currentYear.value += 1
+      } else {
+        currentMonth.value += 1
+      }
+    }
+
+    return {
+      days,
+      daysInMonth,
+      emptyDaysStart,
+      selectDate,
+      isToday,
+      currentYear,
+      monthName,
+      previousMonth,
+      nextMonth,
+    }
   },
 })
 </script>

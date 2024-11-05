@@ -52,7 +52,9 @@
                 transactionsByDate[
                   formatDate(currentYear, currentMonth, date)
                 ] || []
-              ).slice(0, 2)"
+              )
+                .slice(0, 2)
+                .reverse()"
               :key="transaction.amount"
               class="text-xs font-semibold truncate"
               :class="

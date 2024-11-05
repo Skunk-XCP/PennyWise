@@ -7,6 +7,7 @@
       @close="showModal = false"
       @transaction="handleTransaction"
       :initialMode="'income'"
+      :selectedDate="selectedDate"
     />
 
     <!-- Affichage conditionnel -->
@@ -63,6 +64,7 @@ export default defineComponent({
     const income = ref(parseFloat(localStorage.getItem('income') || '0'))
     const expenses = ref(parseFloat(localStorage.getItem('expenses') || '0'))
     const transactions = ref<Transaction[]>([])
+    const selectedDate = ref(new Date().toISOString().split('T')[0])
 
     const showModal = ref(false)
     const isCalendarModalOpen = ref(false)
@@ -87,24 +89,21 @@ export default defineComponent({
       isCalendarModalOpen.value = false
     }
 
+    const updateSelectedDate = (newDate: Date) => {
+      selectedDate.value = newDate.toISOString().split('T')[0]
+    }
+
     const handleTransaction = (transaction: {
       amount: number
       mode: 'income' | 'expenses'
+      date: string
     }) => {
       if (transaction.mode === 'income') {
         income.value += transaction.amount
       } else if (transaction.mode === 'expenses') {
         expenses.value += transaction.amount
       }
-
-      // Utiliser la date actuelle pour les nouvelles transactions, sans affecter les transactions existantes
-      const todayDate = new Date().toISOString().split('T')[0]
-      transactions.value.push({
-        ...transaction,
-        date: todayDate,
-      })
-
-      // Sauvegarder les transactions dans le localStorage sans altérer les dates d'origine
+      transactions.value.push(transaction)
       localStorage.setItem('transactions', JSON.stringify(transactions.value))
     }
 
@@ -126,6 +125,8 @@ export default defineComponent({
       isCalendarModalOpen,
       openCalendarModal,
       closeCalendarModal,
+      selectedDate,
+      updateSelectedDate,
     }
   },
 })

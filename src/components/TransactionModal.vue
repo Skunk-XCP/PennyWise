@@ -60,7 +60,7 @@
       <!-- Modal de sélection de date simple -->
       <CalendarSimpleModal
         v-if="isDateSelectorOpen"
-        :selectedDate="selectedDate"
+        :selectedDate="internalSelectedDate"
         @close="isDateSelectorOpen = false"
         @updateDate="updateDate"
       />
@@ -87,15 +87,19 @@ export default defineComponent({
       type: String,
       default: 'income',
     },
+    selectedDate: {
+      type: String,
+      required: true,
+    },
   },
   setup(props, { emit }) {
     const amount = ref<number | null>(null)
     const mode = ref<'income' | 'expenses'>('expenses')
-    const selectedDate = ref(new Date())
+    const internalSelectedDate = ref(new Date(props.selectedDate))
     const isDateSelectorOpen = ref(false)
 
     const formattedDate = computed(() => {
-      return selectedDate.value.toLocaleDateString('fr-FR', {
+      return internalSelectedDate.value.toLocaleDateString('fr-FR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -111,7 +115,7 @@ export default defineComponent({
     }
 
     const updateDate = (newDate: Date) => {
-      selectedDate.value = newDate
+      internalSelectedDate.value = newDate
       isDateSelectorOpen.value = false
     }
 
@@ -120,7 +124,7 @@ export default defineComponent({
         emit('transaction', {
           amount: amount.value,
           mode: mode.value,
-          date: selectedDate.value.toISOString().split('T')[0],
+          date: internalSelectedDate.value.toISOString().split('T')[0],
         })
         amount.value = null
         emit('close')
@@ -132,7 +136,7 @@ export default defineComponent({
       mode,
       setMode,
       addTransaction,
-      selectedDate,
+      internalSelectedDate,
       formattedDate,
       isDateSelectorOpen,
       openDateSelector,
