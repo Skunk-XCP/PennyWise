@@ -1,13 +1,16 @@
 <template>
   <div class="space-y-6">
-    <div v-for="(transactions, date) in groupedTransactions" :key="date">
+    <div
+      v-for="(transactions, date) in filteredAndGroupedTransactions"
+      :key="date"
+    >
       <div
         class="text-center bg-blue-200 p-2 rounded-lg font-bold text-lg mb-2"
       >
         {{ formatDate(date) }}
       </div>
       <div
-        v-for="(transaction, index) in [...transactions].reverse()"
+        v-for="(transaction, index) in transactions"
         :key="index"
         class="flex justify-between p-2 bg-white rounded-lg shadow-md mb-2"
       >
@@ -39,15 +42,33 @@ export default defineComponent({
       >,
       required: true,
     },
+    selectedMonth: {
+      type: Number,
+      required: true,
+    },
+    selectedYear: {
+      type: Number,
+      required: true,
+    },
   },
   setup(props) {
-    // Regroupe les transactions par date
-    const groupedTransactions = computed(() => {
-      // Trie d'abord les transactions par date décroissante
-      const sortedTransactions = [...props.transactions].sort(
+    // Filtre et organise les transactions pour le mois et l'année sélectionnés par ordre décroissant
+    const filteredAndGroupedTransactions = computed(() => {
+      // Filtre les transactions en fonction du mois et de l'année sélectionnés
+      const filteredTransactions = props.transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.date)
+        return (
+          transactionDate.getMonth() === props.selectedMonth &&
+          transactionDate.getFullYear() === props.selectedYear
+        )
+      })
+
+      // Trie les transactions par date décroissante
+      const sortedTransactions = filteredTransactions.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       )
 
+      // Regroupe les transactions par date
       return sortedTransactions.reduce(
         (acc, transaction) => {
           const date = transaction.date
@@ -77,7 +98,7 @@ export default defineComponent({
     }
 
     return {
-      groupedTransactions,
+      filteredAndGroupedTransactions,
       formatDate,
     }
   },

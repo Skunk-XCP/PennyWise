@@ -1,6 +1,11 @@
 <template>
   <main>
-    <FinanceCard :income="income" :expenses="expenses" />
+    <FinanceCard
+      :transactions="transactions"
+      :selectedMonth="selectedMonth"
+      :selectedYear="selectedYear"
+      @changeMonth="updateSelectedMonth"
+    />
 
     <TransactionModal
       v-if="showModal"
@@ -23,7 +28,11 @@
         @close="isCalendarModalOpen = false"
       />
 
-      <TransactionList :transactions="transactions" />
+      <TransactionList
+        :transactions="transactions"
+        :selectedMonth="selectedMonth"
+        :selectedYear="selectedYear"
+      />
     </div>
     <div
       v-else
@@ -68,6 +77,10 @@ export default defineComponent({
 
     const showModal = ref(false)
     const isCalendarModalOpen = ref(false)
+
+    // Variables pour le mois et l'année sélectionnés
+    const selectedMonth = ref(new Date().getMonth())
+    const selectedYear = ref(new Date().getFullYear())
 
     // Charger les transactions telles quelles, sans modifier les dates
     onMounted(() => {
@@ -115,6 +128,12 @@ export default defineComponent({
       localStorage.setItem('expenses', newExpenses.toString())
     })
 
+    // Fonction pour mettre à jour le mois et l'année sélectionnés
+    const updateSelectedMonth = (month: number, year: number) => {
+      selectedMonth.value = month
+      selectedYear.value = year
+    }
+
     return {
       showModal,
       openModal,
@@ -126,29 +145,11 @@ export default defineComponent({
       openCalendarModal,
       closeCalendarModal,
       selectedDate,
+      selectedMonth,
+      selectedYear,
       updateSelectedDate,
+      updateSelectedMonth,
     }
   },
 })
 </script>
-
-<style scoped>
-.transaction-list-container {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-.transaction-list-container::-webkit-scrollbar {
-  width: 8px;
-}
-.transaction-list-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-.transaction-list-container::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border-radius: 10px;
-}
-.transaction-list-container::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
-}
-</style>
