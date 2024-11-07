@@ -26,7 +26,7 @@
           placeholder="Saisir un montant"
           min="0"
           step="0.01"
-          class="border rounded ml-8"
+          class="border rounded ml-8 pl-2"
           v-model.number="amount"
         />
       </div>

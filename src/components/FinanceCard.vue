@@ -2,13 +2,19 @@
   <div class="finance-card flex flex-col">
     <!-- Navigation des mois -->
     <div class="flex justify-center mb-6">
-      <button @click="previousMonth" class="text-gray-600 hover:text-black">
+      <button
+        @click="previousMonth"
+        class="text-gray-600 hover:text-black bg-blue-200 rounded-full"
+      >
         <Icon icon="mdi:chevron-left" class="h-6 w-6" />
       </button>
       <h2 class="text-xl font-bold text-center px-6">
         {{ monthName }} {{ selectedYear }}
       </h2>
-      <button @click="nextMonth" class="text-gray-600 hover:text-black">
+      <button
+        @click="nextMonth"
+        class="text-gray-600 hover:text-black bg-blue-200 rounded-full"
+      >
         <Icon icon="mdi:chevron-right" class="h-6 w-6" />
       </button>
     </div>
